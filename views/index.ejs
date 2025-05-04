@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Set the character encoding and viewport for responsive design -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miyeok - Seaweed Soup Imageboard</title>
+    <!-- Link to the stylesheet with cache-busting -->
+    <link rel="stylesheet" href="/style.css?v=<%= new Date().getTime() %>">
+</head>
+<body>
+    <!-- Header section with the site title, mascot, navigation, and dark mode toggle -->
+    <header>
+        <h1>
+            <a href="/">Miyeok</a>
+            <img src="/calico.png" alt="Miyeok Mascot" class="mascot" onerror="this.style.display='none';">
+        </h1> <!-- Site title with mascot -->
+        <nav>
+            <ul>
+                <!-- Loop through the boards and create navigation links -->
+                <% boards.forEach(board => { %>
+                    <li><a href="/<%= board %>">/<%= board %></a></li>
+                <% }); %>
+            </ul>
+        </nav>
+        <button id="dark-mode-toggle" class="dark-mode-button">Toggle Dark Mode</button>
+    </header>
+    <!-- Main content area -->
+    <main>
+        <!-- Home page section -->
+        <% if (page === 'home') { %>
+            <h2>Welcome to Miyeok</h2> <!-- Welcome message -->
+            <p>Anonymous imageboard inspired by seaweed soup. Choose a board:</p>
+            <ul>
+                <!-- List all boards as links -->
+                <% boards.forEach(board => { %>
+                    <li><a href="/<%= board %>">/<%= board %></a></li>
+                <% }); %>
+            </ul>
+            <!-- Instructions section explaining how the site works -->
+            <div class="instructions">
+                <h3>How Miyeok Works</h3>
+                <p>Miyeok is an anonymous imageboard where you can post and share content across various boards. Here's how it works:</p>
+                <ul>
+                    <li><strong>Posting:</strong> Create a new thread on any board by submitting a post with optional media (images or videos). Replies can be added to existing threads.</li>
+                    <li><strong>Thread Order:</strong> Newest posts and threads with recent replies flow to the top of the board.</li>
+                    <li><strong>Pagination:</strong> Each board displays 10 posts per page, with a maximum of 10 pages (100 threads total).</li>
+                    <li><strong>Thread Pruning:</strong> To save space, older threads are automatically deleted once the board exceeds 100 threads. Threads with fewer replies are deleted first.</li>
+                    <li><strong>Text Markup:</strong> Use **bold**, *italic*, and > blockquote to format your posts.</li>
+                    <li><strong>Media Limits:</strong> Images and videos are limited to 50MB. Videos are also limited to 10 minutes and 4K resolution.</li>
+                </ul>
+            </div>
+        <!-- Thread page section -->
+        <% } else if (page === 'thread') { %>
+            <h2>/<%= board %> - Thread #<%= thread.id %></h2> <!-- Thread title -->
+            <!-- Display tags if the thread has any -->
+            <% if (thread.tags) { %>
+                <div class="tags">
+                    <% thread.tags.split(',').forEach(tag => { %>
+                        <span class="tag"><%= tag.trim() %></span>
+                    <% }); %>
+                </div>
+            <% } %>
+            <!-- Thread container -->
+            <div class="thread-container">
+                <div class="thread">
+                    <!-- Display the original post (OP) -->
+                    <div class="post" id="post-<%= thread.id %>">
+                        <p><a href="#" class="post-number" data-post-id="<%= thread.id %>">#<%= thread.id %></a></p> <!-- Post number -->
+                        <!-- Display a quote link if the post quotes another post -->
+                        <% if (thread.quote_id) { %>
+                            <p>Quoting <a href="#post-<%= thread.quote_id %>" class="quote-link" data-thread-id="<%= thread.id %>" data-post-id="<%= thread.quote_id %>">#<%= thread.quote_id %></a></p>
+                        <% } %>
+                        <p><%- thread.content %></p> <!-- Post content (HTML from server) -->
+                        <!-- Display media if the post has an image or video -->
+                        <% if (thread.image) { %>
+                            <% if (thread.isVideo) { %>
+                                <video controls class="thumbnail">
+                                    <source src="<%= thread.image %>" type="video/<%= thread.image.split('.').pop() %>">
+                                    Your browser does not support the video tag.
+                                </video>
+                            <% } else { %>
+                                <a href="<%= thread.image %>" target="_blank">
+                                    <img src="<%= thread.image %>" alt="Thread image" class="thumbnail">
+                                </a>
+                            <% } %>
+                        <% } %>
+                        <p><small><%= thread.created_at %></small></p> <!-- Post timestamp -->
+                        <!-- Reply form (hidden by default, toggled by JavaScript) -->
+                        <form action="/<%= board %>?thread_id=<%= thread.id %>" method="POST" enctype="multipart/form-data" class="reply-form" id="reply-form-<%= thread.id %>" style="display: none;" data-thread-id="<%= thread.id %>">
+                            <input type="hidden" name="parent_id" value="<%= thread.id %>"> <!-- Parent ID for the reply -->
+                            <input type="hidden" name="quote_id" value="<%= thread.id %>"> <!-- Quote ID for the reply -->
+                            <textarea name="content" placeholder="Reply to #<%= thread.id %>"></textarea> <!-- Reply content -->
+                            <input type="file" name="media" accept="image/*,video/mp4,video/webm"> <!-- File upload for media -->
+                            <div id="media-error-<%= thread.id %>" class="error-message" style="display: none;"></div> <!-- Error message for media -->
+                            <button type="submit">Reply</button> <!-- Submit button -->
+                        </form>
+                    </div>
+                    <!-- Display all replies -->
+                    <% replies.forEach(reply => { %>
+                        <div class="post reply" id="post-<%= reply.id %>">
+                            <p><a href="#" class="post-number" data-post-id="<%= reply.id %>">#<%= reply.id %></a></p> <!-- Reply number -->
+                            <!-- Display a quote link if the reply quotes another post -->
+                            <% if (reply.quote_id) { %>
+                                <p>Quoting <a href="#post-<%= reply.quote_id %>" class="quote-link" data-thread-id="<%= thread.id %>" data-post-id="<%= reply.quote_id %>">#<%= reply.quote_id %></a></p>
+                            <% } %>
+                            <p><%- reply.content %></p> <!-- Reply content (HTML from server) -->
+                            <!-- Display media if the reply has an image or video -->
+                            <% if (reply.image) { %>
+                                <% if (reply.isVideo) { %>
+                                    <video controls class="thumbnail">
+                                        <source src="<%= reply.image %>" type="video/<%= reply.image.split('.').pop() %>">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                <% } else { %>
+                                    <a href="<%= reply.image %>" target="_blank">
+                                        <img src="<%= reply.image %>" alt="Reply image" class="thumbnail">
+                                    </a>
+                                <% } %>
+                            <% } %>
+                            <p><small><%= reply.created_at %></small></p> <!-- Reply timestamp -->
+                            <!-- Reply form for replying to this reply -->
+                            <form action="/<%= board %>?thread_id=<%= thread.id %>" method="POST" enctype="multipart/form-data" class="reply-form" id="reply-form-<%= reply.id %>" style="display: none;" data-thread-id="<%= thread.id %>">
+                                <input type="hidden" name="parent_id" value="<%= thread.id %>"> <!-- Parent ID (thread ID) -->
+                                <input type="hidden" name="quote_id" value="<%= reply.id %>"> <!-- Quote ID (this reply's ID) -->
+                                <textarea name="content" placeholder="Reply to #<%= reply.id %>"></textarea> <!-- Reply content -->
+                                <input type="file" name="media" accept="image/*,video/mp4,video/webm"> <!-- File upload for media -->
+                                <div id="media-error-<%= reply.id %>" class="error-message" style="display: none;"></div> <!-- Error message for media -->
+                                <button type="submit">Reply</button> <!-- Submit button -->
+                            </form>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+            <!-- Form to add a new reply to the thread -->
+            <form action="/<%= board %>?thread_id=<%= thread.id %>" method="POST" enctype="multipart/form-data" id="thread-reply-form" data-thread-id="<%= thread.id %>">
+                <input type="hidden" name="parent_id" value="<%= thread.id %>"> <!-- Parent ID for the reply -->
+                <textarea name="content" required></textarea> <!-- Reply content (required) -->
+                <input type="file" name="media" accept="image/*,video/mp4,video/webm"> <!-- File upload for media -->
+                <div id="media-error-thread" class="error-message" style="display: none;"></div> <!-- Error message for media -->
+                <button type="submit">Reply</button> <!-- Submit button -->
+            </form>
+            <a href="/<%= board %>">Back to /<%= board %></a> <!-- Link to return to the board -->
+        <% } %>
+    </main>
+    <!-- JavaScript for interactivity -->
+    <script>
+        // Dark mode toggle functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleButton = document.getElementById('dark-mode-toggle');
+            const body = document.body;
+
+            // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                body.classList.add('dark-mode');
+                toggleButton.textContent = 'Toggle Light Mode';
+            }
+
+            // Toggle dark mode on button click
+            toggleButton.addEventListener('click', () => {
+                body.classList.toggle('dark-mode');
+                if (body.classList.contains('dark-mode')) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    toggleButton.textContent = 'Toggle Light Mode';
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                    toggleButton.textContent = 'Toggle Dark Mode';
+                }
+            });
+        });
+
+        // Function to validate media files (type and video resolution)
+        async function validateMediaFile(file, errorElementId) {
+            const errorElement = document.getElementById(errorElementId);
+            errorElement.style.display = 'none';
+            errorElement.textContent = '';
+
+            if (!file) return true; // No file selected, validation passes
+
+            const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            const allowedVideoTypes = ['video/mp4', 'video/webm'];
+            const maxVideoSizeMB = 50; // 50MB limit for videos (matches server-side limit)
+            const maxResolutionWidth = 3840; // 4K width limit
+            const maxResolutionHeight = 2160; // 4K height limit
+
+            const fileType = file.type;
+            const fileSizeMB = file.size / (1024 * 1024); // Convert bytes to MB
+
+            // Validate file type
+            if (allowedImageTypes.includes(fileType)) {
+                // No size limit for images; validation passes
+                return true;
+            } else if (allowedVideoTypes.includes(fileType)) {
+                if (fileSizeMB > maxVideoSizeMB) {
+                    errorElement.textContent = `Video size exceeds ${maxVideoSizeMB}MB limit.`;
+                    errorElement.style.display = 'block';
+                    return false;
+                }
+
+                // Validate video resolution
+                try {
+                    const resolution = await getVideoResolution(file);
+                    if (resolution.width > maxResolutionWidth || resolution.height > maxResolutionHeight) {
+                        errorElement.textContent = `Video resolution exceeds 4K (${maxResolutionWidth}x${maxResolutionHeight}).`;
+                        errorElement.style.display = 'block';
+                        return false;
+                    }
+                } catch (err) {
+                    errorElement.textContent = 'Unable to validate video resolution. Please try a different file.';
+                    errorElement.style.display = 'block';
+                    return false;
+                }
+            } else {
+                errorElement.textContent = 'Only images (JPEG, PNG, GIF) and videos (MP4, WebM) are allowed.';
+                errorElement.style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+
+        // Function to get video resolution
+        function getVideoResolution(file) {
+            return new Promise((resolve, reject) => {
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+
+                video.onloadedmetadata = () => {
+                    const resolution = {
+                        width: video.videoWidth,
+                        height: video.videoHeight
+                    };
+                    URL.revokeObjectURL(video.src); // Clean up
+                    resolve(resolution);
+                };
+
+                video.onerror = () => {
+                    URL.revokeObjectURL(video.src); // Clean up
+                    reject(new Error('Error loading video metadata'));
+                };
+
+                video.src = URL.createObjectURL(file);
+            });
+        }
+
+        // Validate the thread reply form
+        document.getElementById('thread-reply-form').addEventListener('submit', async (e) => {
+            const fileInput = document.querySelector('#thread-reply-form input[type="file"]');
+            const file = fileInput.files[0];
+            const isValid = await validateMediaFile(file, 'media-error-thread');
+            if (!isValid) {
+                e.preventDefault(); // Prevent form submission if validation fails
+            }
+        });
+
+        // Validate reply forms
+        document.querySelectorAll('.reply-form').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                const fileInput = form.querySelector('input[type="file"]');
+                const file = fileInput.files[0];
+                const postId = form.id.replace('reply-form-', '');
+                const isValid = await validateMediaFile(file, `media-error-${postId}`);
+                if (!isValid) {
+                    e.preventDefault(); // Prevent form submission if validation fails
+                }
+            });
+        });
+
+        // Toggle reply forms when clicking on a post number
+        document.querySelectorAll('.post-number').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent default link behavior
+                const postId = link.getAttribute('data-post-id'); // Get the post ID
+                const form = document.getElementById(`reply-form-${postId}`); // Find the corresponding reply form
+                form.style.display = form.style.display === 'none' ? 'block' : 'none'; // Toggle visibility
+            });
+        });
+
+        // Handle quote links (scroll to quoted post if within the same thread)
+        document.querySelectorAll('.quote-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const threadId = link.getAttribute('data-thread-id'); // Get the thread ID
+                const postId = link.getAttribute('data-post-id'); // Get the post ID
+                const currentThreadId = window.location.pathname.split('/')[2] || ''; // Get the current thread ID from URL
+
+                if (currentThreadId === threadId) {
+                    e.preventDefault(); // Prevent default link behavior
+                    const targetPost = document.getElementById(`post-${postId}`); // Find the target post
+                    if (targetPost) {
+                        targetPost.scrollIntoView({ behavior: 'smooth', block: 'start' }); // Scroll to the post
+                        targetPost.classList.add('highlight'); // Highlight the post
+                        setTimeout(() => targetPost.classList.remove('highlight'), 2000); // Remove highlight after 2 seconds
+                    }
+                }
+            });
+        });
+
+        // Scroll to a post on page load if a hash (e.g., #post-1) exists in the URL
+        window.addEventListener('load', () => {
+            const hash = window.location.hash; // Get the URL hash
+            if (hash) {
+                const targetPost = document.querySelector(hash); // Find the target element
+                if (targetPost) {
+                    targetPost.scrollIntoView({ behavior: 'smooth', block: 'start' }); // Scroll to the element
+                    targetPost.classList.add('highlight'); // Highlight the element
+                    setTimeout(() => targetPost.classList.remove('highlight'), 2000); // Remove highlight after 2 seconds
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Set the character encoding and viewport for responsive design -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miyeok - /<%= board %></title> <!-- Dynamic title with the board name -->
+    <!-- Link to the stylesheet with cache-busting -->
+    <link rel="stylesheet" href="/style.css?v=<%= new Date().getTime() %>">
+</head>
+<body>
+    <!-- Header section with the site title, mascot, navigation, and dark mode toggle -->
+    <header>
+        <h1>
+            <a href="/">Miyeok</a>
+            <img src="/calico.png" alt="Miyeok Mascot" class="mascot" onerror="this.style.display='none';">
+        </h1> <!-- Site title with mascot -->
+        <nav>
+            <ul>
+                <!-- Loop through the boards and create navigation links -->
+                <% boards.forEach(b => { %>
+                    <li><a href="/<%= b %>">/<%= b %></a></li>
+                <% }); %>
+            </ul>
+        </nav>
+        <button id="dark-mode-toggle" class="dark-mode-button">Toggle Dark Mode</button>
+    </header>
+    <!-- Main content area -->
+    <main>
+        <h2>/<%= board %></h2> <!-- Board title -->
+        <!-- Tag filter dropdown -->
+        <div class="tag-filter">
+            <label for="tag-select">Filter by Tag: </label>
+            <select id="tag-select" onchange="filterByTag(this.value)">
+                <option value="">All Tags</option>
+                <% tags.forEach(tag => { %>
+                    <option value="<%= tag %>" <%= selectedTag === tag ? 'selected' : '' %>><%= tag %></option>
+                <% }); %>
+            </select>
+        </div>
+        <!-- Form to create a new thread -->
+        <form action="/<%= board %>" method="POST" enctype="multipart/form-data" id="new-thread-form">
+            <textarea name="content" required></textarea> <!-- Textarea for thread content (required) -->
+            <input type="file" name="media" accept="image/*,video/mp4,video/webm"> <!-- File upload for media -->
+            <div id="media-error" class="error-message" style="display: none;"></div> <!-- Error message for media -->
+            <input type="text" name="tags" placeholder="Tags (e.g., discussion,meme)" class="tag-input"> <!-- Input for tags -->
+            <div class="submit-button-wrapper">
+                <button type="submit">Post</button> <!-- Submit button -->
+            </div>
+        </form>
+        <!-- Container for thread previews -->
+        <div class="threads">
+            <!-- Loop through each thread preview -->
+            <% previews.forEach(preview => { %>
+                <div class="thread-preview">
+                    <h3>
+                        Thread #<%= preview.thread_id %> 
+                        <% if (preview.isBumpLimited) { %>
+                            <span class="bump-limit-label">[Bump Limit Reached]</span>
+                        <% } %>
+                        (<span class="reply-count"><%= preview.reply_count %> <%= preview.reply_count === 1 ? 'reply' : 'replies' %></span>)
+                    </h3> <!-- Thread title with reply count -->
+                    <!-- Display tags if the thread has any -->
+                    <% if (preview.posts[0].tags) { %>
+                        <div class="tags">
+                            <% preview.posts[0].tags.split(',').forEach(tag => { %>
+                                <a href="/<%= board %>?tag=<%= tag.trim() %>" class="tag"><%= tag.trim() %></a>
+                            <% }); %>
+                        </div>
+                    <% } %>
+                    <!-- Loop through posts in the preview (OP and last two replies) -->
+                    <% preview.posts.forEach(post => { %>
+                        <div class="post" id="post-<%= post.id %>">
+                            <p><a href="#" class="post-number" data-post-id="<%= post.id %>">#<%= post.id %></a></p> <!-- Post number -->
+                            <!-- Display a quote link if the post quotes another post -->
+                            <% if (post.quote_id) { %>
+                                <p>Quoting <a href="/<%= board %>/<%= preview.thread_id %>#post-<%= post.quote_id %>" class="quote-link" data-thread-id="<%= preview.thread_id %>" data-post-id="<%= post.quote_id %>">#<%= post.quote_id %></a></p>
+                            <% } %>
+                            <p><%- post.content %></p> <!-- Post content (HTML from server) -->
+                            <!-- Display media if the post has an image or video -->
+                            <% if (post.image) { %>
+                                <% if (post.isVideo && post.thumbnail) { %>
+                                    <a href="/<%= board %>/<%= preview.thread_id %>#post-<%= post.id %>">
+                                        <img src="<%= post.thumbnail %>" alt="Video thumbnail" class="thumbnail">
+                                    </a>
+                                <% } else if (post.image) { %>
+                                    <a href="<%= post.image %>" target="_blank">
+                                        <img src="<%= post.image %>" alt="Post image" class="thumbnail">
+                                    </a>
+                                <% } %>
+                            <% } %>
+                            <p><small><%= post.created_at %></small></p> <!-- Post timestamp -->
+                            <!-- Reply form (hidden by default, toggled by JavaScript) -->
+                            <form action="/<%= board %>?thread_id=<%= preview.thread_id %>" method="POST" enctype="multipart/form-data" class="reply-form" id="reply-form-<%= post.id %>" style="display: none;" data-thread-id="<%= preview.thread_id %>">
+                                <input type="hidden" name="parent_id" value="<%= preview.thread_id %>"> <!-- Parent ID for the reply -->
+                                <input type="hidden" name="quote_id" value="<%= post.id %>"> <!-- Quote ID for the reply -->
+                                <textarea name="content" placeholder="Reply to #<%= post.id %>"></textarea> <!-- Reply content -->
+                                <input type="file" name="media" accept="image/*,video/mp4,video/webm"> <!-- File upload for media -->
+                                <div id="media-error-<%= post.id %>" class="error-message" style="display: none;"></div> <!-- Error message for media -->
+                                <button type="submit">Reply</button> <!-- Submit button -->
+                            </form>
+                        </div>
+                    <% }); %>
+                    <a href="/<%= board %>/<%= preview.thread_id %>" class="reply-link">Reply</a> <!-- Link to view the full thread and reply -->
+                </div>
+            <% }); %>
+        </div>
+        <!-- Pagination section (displayed if there are multiple pages) -->
+        <% if (totalPages > 1) { %>
+            <div class="pagination">
+                <!-- Previous page link (if not on the first page) -->
+                <% if (page > 1) { %>
+                    <a href="/<%= board %>/page/<%= page - 1 %><%= selectedTag ? `?tag=${selectedTag}` : '' %>">Prev</a>
+                <% } %>
+                <!-- Page number links -->
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="/<%= board %>/page/<%= i %><%= selectedTag ? `?tag=${selectedTag}` : '' %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+                <!-- Next page link (if not on the last page) -->
+                <% if (page < totalPages) { %>
+                    <a href="/<%= board %>/page/<%= page + 1 %><%= selectedTag ? `?tag=${selectedTag}` : '' %>">Next</a>
+                <% } %>
+            </div>
+        <% } %>
+    </main>
+    <!-- JavaScript for interactivity -->
+    <script>
+        // Dark mode toggle functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleButton = document.getElementById('dark-mode-toggle');
+            const body = document.body;
+
+            // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                body.classList.add('dark-mode');
+                toggleButton.textContent = 'Toggle Light Mode';
+            }
+
+            // Toggle dark mode on button click
+            toggleButton.addEventListener('click', () => {
+                body.classList.toggle('dark-mode');
+                if (body.classList.contains('dark-mode')) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    toggleButton.textContent = 'Toggle Light Mode';
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                    toggleButton.textContent = 'Toggle Dark Mode';
+                }
+            });
+        });
+
+        // Function to validate media files (type and video resolution)
+        async function validateMediaFile(file, errorElementId) {
+            const errorElement = document.getElementById(errorElementId);
+            errorElement.style.display = 'none';
+            errorElement.textContent = '';
+
+            if (!file) return true; // No file selected, validation passes
+
+            const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            const allowedVideoTypes = ['video/mp4', 'video/webm'];
+            const maxVideoSizeMB = 50; // 50MB limit for videos (matches server-side limit)
+            const maxResolutionWidth = 3840; // 4K width limit
+            const maxResolutionHeight = 2160; // 4K height limit
+
+            const fileType = file.type;
+            const fileSizeMB = file.size / (1024 * 1024); // Convert bytes to MB
+
+            // Validate file type
+            if (allowedImageTypes.includes(fileType)) {
+                // No size limit for images; validation passes
+                return true;
+            } else if (allowedVideoTypes.includes(fileType)) {
+                if (fileSizeMB > maxVideoSizeMB) {
+                    errorElement.textContent = `Video size exceeds ${maxVideoSizeMB}MB limit.`;
+                    errorElement.style.display = 'block';
+                    return false;
+                }
+
+                // Validate video resolution
+                try {
+                    const resolution = await getVideoResolution(file);
+                    if (resolution.width > maxResolutionWidth || resolution.height > maxResolutionHeight) {
+                        errorElement.textContent = `Video resolution exceeds 4K (${maxResolutionWidth}x${maxResolutionHeight}).`;
+                        errorElement.style.display = 'block';
+                        return false;
+                    }
+                } catch (err) {
+                    errorElement.textContent = 'Unable to validate video resolution. Please try a different file.';
+                    errorElement.style.display = 'block';
+                    return false;
+                }
+            } else {
+                errorElement.textContent = 'Only images (JPEG, PNG, GIF) and videos (MP4, WebM) are allowed.';
+                errorElement.style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+
+        // Function to get video resolution
+        function getVideoResolution(file) {
+            return new Promise((resolve, reject) => {
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+
+                video.onloadedmetadata = () => {
+                    const resolution = {
+                        width: video.videoWidth,
+                        height: video.videoHeight
+                    };
+                    URL.revokeObjectURL(video.src); // Clean up
+                    resolve(resolution);
+                };
+
+                video.onerror = () => {
+                    URL.revokeObjectURL(video.src); // Clean up
+                    reject(new Error('Error loading video metadata'));
+                };
+
+                video.src = URL.createObjectURL(file);
+            });
+        }
+
+        // Validate the new thread form
+        document.getElementById('new-thread-form').addEventListener('submit', async (e) => {
+            const fileInput = document.querySelector('#new-thread-form input[type="file"]');
+            const file = fileInput.files[0];
+            const isValid = await validateMediaFile(file, 'media-error');
+            if (!isValid) {
+                e.preventDefault(); // Prevent form submission if validation fails
+            }
+        });
+
+        // Validate reply forms
+        document.querySelectorAll('.reply-form').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                const fileInput = form.querySelector('input[type="file"]');
+                const file = fileInput.files[0];
+                const postId = form.id.replace('reply-form-', '');
+                const isValid = await validateMediaFile(file, `media-error-${postId}`);
+                if (!isValid) {
+                    e.preventDefault(); // Prevent form submission if validation fails
+                }
+            });
+        });
+
+        // Toggle reply forms when clicking on a post number
+        document.querySelectorAll('.post-number').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent default link behavior
+                const postId = link.getAttribute('data-post-id'); // Get the post ID
+                const form = document.getElementById(`reply-form-${postId}`); // Find the corresponding reply form
+                form.style.display = form.style.display === 'none' ? 'block' : 'none'; // Toggle visibility
+            });
+        });
+
+        // Handle quote links (scroll to quoted post if within the same thread)
+        document.querySelectorAll('.quote-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const threadId = link.getAttribute('data-thread-id'); // Get the thread ID
+                const postId = link.getAttribute('data-post-id'); // Get the post ID
+                const currentThreadId = window.location.pathname.split('/')[2] || ''; // Get the current thread ID from URL
+
+                if (currentThreadId === threadId) {
+                    e.preventDefault(); // Prevent default link behavior
+                    const targetPost = document.getElementById(`post-${postId}`); // Find the target post
+                    if (targetPost) {
+                        targetPost.scrollIntoView({ behavior: 'smooth', block: 'start' }); // Scroll to the post
+                        targetPost.classList.add('highlight'); // Highlight the post
+                        setTimeout(() => targetPost.classList.remove('highlight'), 2000); // Remove highlight after 2 seconds
+                    }
+                }
+            });
+        });
+
+        // Function to handle tag filtering
+        function filterByTag(tag) {
+            const url = tag ? `/<%= board %>/page/1?tag=${encodeURIComponent(tag)}` : `/<%= board %>/page/1`;
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>

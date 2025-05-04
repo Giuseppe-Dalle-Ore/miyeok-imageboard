@@ -1,0 +1,502 @@
+/* Define CSS variables for light mode (default) */
+:root {
+  --background: #f4f1e9; /* Light beige background */
+  --text-color: #2e4d2b; /* Dark green text */
+  --header-bg-start: #3a5f36; /* Dark green gradient start */
+  --header-bg-end: #5e8b57; /* Light green gradient end */
+  --link-color: #f4f1e9; /* Light beige links */
+  --border-color: #4a7a45; /* Green border */
+  --button-bg: #2e4d2b; /* Dark green button background */
+  --button-bg-hover: #4a7a45; /* Lighter green on hover */
+  --button-text: #f4f1e9; /* Light beige button text */
+  --post-bg: #f4f1e9; /* Light beige post background */
+  --thread-bg-start: #3a5f36; /* Dark green gradient start for threads */
+  --thread-bg-end: #5e8b57; /* Light green gradient end for threads */
+  --reply-form-bg: #e0dcd3; /* Light grayish reply form background */
+  --highlight-bg: #d4e4d1; /* Light green highlight */
+  --error-bg: #f2dede; /* Light red error background */
+  --error-border: #ebccd1; /* Light red error border */
+  --error-text: #a94442; /* Red error text */
+  --tag-bg: #2e4d2b; /* Dark green tag background */
+  --tag-bg-hover: #4a7a45; /* Lighter green tag on hover */
+  --tag-text: #f4f1e9; /* Light beige tag text */
+  --bump-limit-bg: #a94442; /* Red background for bump limit label */
+}
+
+/* Dark mode styles */
+.dark-mode {
+  --background: #1a1a1a; /* Dark gray background */
+  --text-color: #d4d4d4; /* Light gray text */
+  --header-bg-start: #2a3a2a; /* Darker green gradient start */
+  --header-bg-end: #4a6a4a; /* Darker green gradient end */
+  --link-color: #a0c0a0; /* Light green links */
+  --border-color: #3a5a3a; /* Darker green border */
+  --button-bg: #3a5a3a; /* Darker green button background */
+  --button-bg-hover: #5a7a5a; /* Lighter green on hover */
+  --button-text: #d4d4d4; /* Light gray button text */
+  --post-bg: #2a2a2a; /* Darker gray post background */
+  --thread-bg-start: #2a3a2a; /* Darker green gradient start for threads */
+  --thread-bg-end: #4a6a4a; /* Darker green gradient end for threads */
+  --reply-form-bg: #3a3a3a; /* Darker gray reply form background */
+  --highlight-bg: #3a5a3a; /* Darker green highlight */
+  --error-bg: #4a2a2a; /* Darker red error background */
+  --error-border: #6a4a4a; /* Darker red error border */
+  --error-text: #ff6666; /* Lighter red error text */
+  --tag-bg: #3a5a3a; /* Darker green tag background */
+  --tag-bg-hover: #5a7a5a; /* Lighter green tag on hover */
+  --tag-text: #d4d4d4; /* Light gray tag text */
+  --bump-limit-bg: #ff6666; /* Lighter red for bump limit label */
+}
+
+/* Reset default styles and set global styles for the body */
+body {
+  font-family: Arial, sans-serif; /* Use Arial font */
+  background: var(--background); /* Dynamic background */
+  color: var(--text-color); /* Dynamic text color */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+}
+
+/* Style the header section */
+header {
+  text-align: left; /* Align header content to the left */
+  background: linear-gradient(180deg, var(--header-bg-start), var(--header-bg-end)); /* Dynamic gradient background */
+  padding: 15px; /* Reduced padding for a tighter look */
+  border-radius: 5px; /* Rounded corners */
+  position: relative; /* For positioning the dark mode toggle */
+  display: flex; /* Use flexbox to align title and mascot */
+  flex-direction: column; /* Stack the h1 and nav vertically */
+  align-items: flex-start; /* Align items to the left */
+  width: 100%; /* Ensure the header takes full width */
+  box-sizing: border-box; /* Include padding in the width calculation */
+}
+
+/* Style the main title (Miyeok) in the header */
+header h1 {
+  font-size: 2.5em; /* Larger font size for the title */
+  margin: 0; /* Remove default margins */
+  display: inline-flex; /* Use inline-flex to align title and mascot */
+  align-items: center; /* Center vertically */
+  gap: 5px; /* Add a small gap between the text and mascot for cleaner spacing */
+}
+
+/* Style the links within the h1 tag */
+h1 a {
+  color: var(--link-color); /* Dynamic link color */
+  text-decoration: none; /* Remove underline from links */
+}
+
+/* Style the mascot image */
+.mascot {
+  width: 70px; /* Slightly larger size (was 60px) */
+  height: auto; /* Maintain aspect ratio */
+  margin-left: 0; /* Remove margin to bring it closer to the text (was 10px) */
+  padding: 0; /* Remove padding for a cleaner look (was 5px) */
+  border-radius: 3px; /* Subtler rounded corners (was 5px) */
+  vertical-align: middle; /* Align with the text */
+  background-color: transparent; /* Set to transparent to remove the white box */
+}
+
+/* Style the navigation container */
+nav {
+  width: 100%; /* Ensure nav takes the full width of the header */
+  overflow-x: auto; /* Allow overflow to enable scrolling */
+}
+
+/* Style the navigation list */
+nav ul {
+  list-style: none; /* Remove default list bullets */
+  padding: 0; /* Remove default padding */
+  margin: 10px 0 0 0; /* Align with content, add top margin */
+  display: flex; /* Use flexbox to keep items in a single row */
+  overflow-x: auto; /* Enable horizontal scrolling */
+  white-space: nowrap; /* Prevent wrapping of items */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on touch devices */
+  scrollbar-width: thin; /* Firefox: Make scrollbar thinner */
+  min-width: max-content; /* Ensure the ul can expand to fit all links */
+}
+
+/* Style each navigation item */
+nav ul li {
+  display: inline-block; /* Ensure items stay inline within the flex container */
+  margin: 0 10px; /* Add spacing between items */
+}
+
+/* Optional: Customize scrollbar for WebKit browsers (Chrome, Safari) */
+nav ul::-webkit-scrollbar {
+  height: 6px; /* Thin scrollbar */
+}
+
+nav ul::-webkit-scrollbar-thumb {
+  background: var(--button-bg); /* Use the dynamic button background color */
+  border-radius: 3px;
+}
+
+nav ul::-webkit-scrollbar-track {
+  background: var(--background); /* Match the page background */
+}
+
+/* Style the links in the navigation */
+nav ul li a {
+  color: var(--link-color); /* Dynamic link color */
+  text-decoration: none; /* Remove underline from links */
+}
+
+/* Style the dark mode toggle button */
+.dark-mode-button {
+  position: absolute; /* Position in the top-right corner */
+  top: 20px;
+  right: 20px;
+  background: var(--button-bg); /* Dynamic button background */
+  color: var(--button-text); /* Dynamic button text */
+  border: none; /* Remove border */
+  padding: 8px 15px; /* Add padding */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background 0.3s; /* Smooth background transition */
+}
+
+/* Hover effect for the dark mode button */
+.dark-mode-button:hover {
+  background: var(--button-bg-hover); /* Dynamic hover background */
+}
+
+/* Style the main content area */
+main {
+  max-width: 800px; /* Limit the width of the main content */
+  margin: 20px; /* Add margin around the main content */
+  text-align: left; /* Align content to the left */
+}
+
+/* Style forms (used for posting and replying) */
+form {
+  margin-bottom: 20px; /* Add space below forms */
+}
+
+/* Style textareas (used for post/reply content) */
+textarea {
+  width: 100%; /* Full width */
+  height: 100px; /* Fixed height */
+  margin-bottom: 10px; /* Add space below */
+  background: var(--background); /* Dynamic background */
+  color: var(--text-color); /* Dynamic text color */
+  border: 1px solid var(--border-color); /* Dynamic border */
+}
+
+/* Style the file input */
+form input[type="file"] {
+  display: block; /* Ensure it takes its own line */
+  margin-bottom: 10px; /* Space below the file input */
+  color: var(--text-color); /* Dynamic text color */
+}
+
+/* Style the tags input */
+.tag-input {
+  width: 100%; /* Full width */
+  padding: 5px; /* Padding inside the input */
+  margin-bottom: 10px; /* Space below the tags input */
+  background: var(--background); /* Dynamic background */
+  color: var(--text-color); /* Dynamic text color */
+  border: 1px solid var(--border-color); /* Dynamic border */
+}
+
+/* Style the submit button wrapper for even spacing */
+.submit-button-wrapper {
+  text-align: left; /* Align the button to the left */
+}
+
+/* Style the submit button */
+form button {
+  background: var(--button-bg); /* Dynamic button background */
+  color: var(--button-text); /* Dynamic button text */
+  border: none; /* Remove border */
+  padding: 8px 15px; /* Add padding */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Hover effect for the submit button */
+form button:hover {
+  background: var(--button-bg-hover); /* Dynamic hover background */
+}
+
+/* Style error messages for media validation */
+.error-message {
+  color: var(--error-text); /* Dynamic error text color */
+  background: var(--error-bg); /* Dynamic error background */
+  padding: 5px 10px; /* Padding inside */
+  border: 1px solid var(--error-border); /* Dynamic error border */
+  border-radius: 3px; /* Slightly rounded corners */
+  margin-bottom: 10px; /* Space below */
+}
+
+/* Style the error container on the error page */
+.error-container {
+  background: var(--error-bg); /* Dynamic error background */
+  border: 1px solid var(--error-border); /* Dynamic error border */
+  padding: 20px; /* Padding inside */
+  border-radius: 5px; /* Rounded corners */
+  text-align: center; /* Center-align text */
+}
+
+/* Style the error message text */
+.error-container .error-message {
+  font-size: 1.2em; /* Slightly larger font */
+  color: var(--error-text); /* Dynamic error text color */
+  margin: 10px 0; /* Vertical spacing */
+}
+
+/* Style the board links list on the error page */
+.board-links {
+  list-style: none; /* Remove default list bullets */
+  padding: 0; /* Remove default padding */
+  margin: 20px 0; /* Vertical spacing */
+}
+
+/* Style each board link item */
+.board-links li {
+  display: inline; /* Display items inline */
+  margin: 0 10px; /* Spacing between items */
+}
+
+/* Style the board links */
+.board-links li a {
+  color: var(--text-color); /* Dynamic text color */
+  text-decoration: none; /* Remove underline */
+}
+
+/* Hover effect for board links */
+.board-links li a:hover {
+  color: var(--button-bg-hover); /* Dynamic hover color */
+  text-decoration: underline; /* Add underline on hover */
+}
+
+/* Style thread previews and thread containers */
+.thread-preview, .thread-container {
+  border: 1px solid var(--border-color); /* Dynamic border color */
+  background: linear-gradient(180deg, var(--thread-bg-start), var(--thread-bg-end)); /* Dynamic gradient background */
+  padding: 15px; /* Add padding inside */
+  margin: 10px 0; /* Add vertical spacing */
+  border-radius: 5px; /* Rounded corners */
+  position: relative; /* For positioning the wave pattern */
+  overflow: hidden; /* Hide overflow from the wave pattern */
+}
+
+/* Add a wave pattern overlay to thread previews and containers */
+.thread-preview::before, .thread-container::before {
+  content: ''; /* Empty content for pseudo-element */
+  position: absolute; /* Position absolutely within the container */
+  top: 0; /* Align to the top */
+  left: 0; /* Align to the left */
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  background: url('/wave-pattern.png') repeat-x bottom; /* Wave pattern background */
+  opacity: 0.2; /* Semi-transparent */
+  pointer-events: none; /* Prevent interaction with the overlay */
+}
+
+/* Style individual posts */
+.post {
+  background: var(--post-bg); /* Dynamic post background */
+  padding: 10px; /* Add padding inside */
+  margin: 5px 0; /* Add vertical spacing */
+  border: 1px solid var(--border-color); /* Dynamic border color */
+  border-radius: 3px; /* Slightly rounded corners */
+}
+
+/* Style the "Reply" link */
+.reply-link {
+  display: inline-block; /* Display as an inline-block element */
+  background: var(--button-bg); /* Dynamic button background */
+  color: var(--button-text); /* Dynamic button text */
+  padding: 8px 15px; /* Add padding */
+  border-radius: 5px; /* Rounded corners */
+  text-decoration: none; /* Remove underline */
+  margin-top: 10px; /* Add space above */
+  transition: background 0.3s; /* Smooth background color transition */
+}
+
+/* Hover effect for the reply link */
+.reply-link:hover {
+  background: var(--button-bg-hover); /* Dynamic hover background */
+  animation: pulse 1s infinite; /* Apply pulse animation */
+}
+
+/* Define the pulse animation for the reply link */
+@keyframes pulse {
+  0% { transform: scale(1); } /* Normal size */
+  50% { transform: scale(1.05); } /* Slightly larger */
+  100% { transform: scale(1); } /* Back to normal */
+}
+
+/* Style media thumbnails (images and videos) */
+.thumbnail {
+  max-width: 200px; /* Limit width */
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 3px; /* Slightly rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: opacity 0.3s; /* Smooth opacity transition */
+}
+
+/* Hover effect for thumbnails */
+.thumbnail:hover {
+  opacity: 0.8; /* Slightly transparent on hover */
+}
+
+/* Style post numbers (e.g., #1) */
+.post-number {
+  color: var(--text-color); /* Dynamic text color */
+  text-decoration: none; /* Remove underline */
+  font-weight: bold; /* Bold text */
+}
+
+/* Hover effect for post numbers */
+.post-number:hover {
+  color: var(--button-bg-hover); /* Dynamic hover color */
+  text-decoration: underline; /* Add underline on hover */
+}
+
+/* Style the reply form */
+.reply-form {
+  margin-top: 10px; /* Add space above */
+  padding: 10px; /* Add padding inside */
+  background: var(--reply-form-bg); /* Dynamic reply form background */
+  border-radius: 3px; /* Slightly rounded corners */
+}
+
+/* Style the textarea in the reply form */
+.reply-form textarea {
+  height: 80px; /* Fixed height for reply textarea */
+}
+
+/* Style the submit button in the reply form */
+.reply-form button {
+  background: var(--button-bg); /* Dynamic button background */
+  color: var(--button-text); /* Dynamic button text */
+  border: none; /* Remove border */
+  padding: 8px 15px; /* Add padding */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Hover effect for the reply form button */
+.reply-form button:hover {
+  background: var(--button-bg-hover); /* Dynamic hover background */
+}
+
+/* Style quote links (e.g., links to quoted posts) */
+.quote-link {
+  color: var(--text-color); /* Dynamic text color */
+  text-decoration: none; /* Remove underline */
+  font-weight: bold; /* Bold text */
+}
+
+/* Hover effect for quote links */
+.quote-link:hover {
+  color: var(--button-bg-hover); /* Dynamic hover color */
+  text-decoration: underline; /* Add underline on hover */
+}
+
+/* Style highlighted posts (e.g., when a post is scrolled to) */
+.highlight {
+  background: var(--highlight-bg); /* Dynamic highlight background */
+  border: 2px solid var(--border-color); /* Dynamic border color */
+  transition: background 0.5s; /* Smooth background transition */
+}
+
+/* Style the reply count (e.g., "3 replies") */
+.reply-count {
+  color: var(--text-color); /* Dynamic text color */
+  font-weight: bold; /* Bold text */
+  font-size: 0.9em; /* Slightly smaller font */
+}
+
+/* Style the bump limit label */
+.bump-limit-label {
+  color: var(--link-color); /* Dynamic text color */
+  background: var(--bump-limit-bg); /* Dynamic background for bump limit label */
+  padding: 2px 6px; /* Small padding */
+  border-radius: 3px; /* Rounded corners */
+  font-size: 0.8em; /* Smaller font */
+  margin-left: 5px; /* Space from thread title */
+}
+
+/* Style the pagination section */
+.pagination {
+  text-align: left; /* Align pagination links to the left */
+  margin: 20px 0; /* Add vertical spacing */
+}
+
+/* Style pagination links */
+.pagination a {
+  display: inline-block; /* Display as inline-block */
+  padding: 8px 12px; /* Add padding */
+  margin: 0 5px; /* Add spacing between links */
+  color: var(--text-color); /* Dynamic text color */
+  text-decoration: none; /* Remove underline */
+  border: 1px solid var(--border-color); /* Dynamic border color */
+  border-radius: 3px; /* Slightly rounded corners */
+  transition: background 0.3s; /* Smooth background transition */
+}
+
+/* Hover effect for pagination links */
+.pagination a:hover {
+  background: var(--button-bg-hover); /* Dynamic hover background */
+  color: var(--button-text); /* Dynamic text color on hover */
+}
+
+/* Style the active pagination link */
+.pagination a.active {
+  background: var(--button-bg); /* Dynamic button background */
+  color: var(--button-text); /* Dynamic button text */
+  font-weight: bold; /* Bold text */
+}
+
+/* Style the instructions section on the home page */
+.instructions {
+  margin-top: 40px; /* Add space above */
+  padding: 15px; /* Add padding inside */
+  background: var(--reply-form-bg); /* Dynamic background */
+  border-radius: 5px; /* Rounded corners */
+}
+
+/* Style the tag filter dropdown */
+.tag-filter {
+  margin-bottom: 20px; /* Add space below */
+}
+
+.tag-filter label {
+  margin-right: 10px; /* Space between label and dropdown */
+  font-weight: bold; /* Bold label */
+}
+
+.tag-filter select {
+  padding: 5px; /* Padding inside the dropdown */
+  border: 1px solid var(--border-color); /* Dynamic border color */
+  border-radius: 3px; /* Slightly rounded corners */
+  background: var(--background); /* Dynamic background */
+  color: var(--text-color); /* Dynamic text color */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Style the tags container */
+.tags {
+  margin: 5px 0; /* Add vertical spacing */
+}
+
+/* Style individual tags */
+.tag {
+  display: inline-block; /* Display tags inline */
+  background: var(--tag-bg); /* Dynamic tag background */
+  color: var(--tag-text); /* Dynamic tag text */
+  padding: 3px 8px; /* Add padding */
+  border-radius: 3px; /* Slightly rounded corners */
+  margin-right: 5px; /* Space between tags */
+  text-decoration: none; /* Remove underline for tag links */
+  font-size: 0.9em; /* Slightly smaller font */
+}
+
+/* Hover effect for tags */
+.tag:hover {
+  background: var(--tag-bg-hover); /* Dynamic hover background */
+}

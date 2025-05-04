@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Set the character encoding and viewport for responsive design -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miyeok - Error</title>
+    <!-- Link to the stylesheet with cache-busting -->
+    <link rel="stylesheet" href="/style.css?v=<%= new Date().getTime() %>">
+</head>
+<body>
+    <!-- Header section with the site title, mascot, and navigation -->
+    <header>
+        <h1>
+            <a href="/">Miyeok</a>
+            <img src="/calico.png" alt="Miyeok Mascot" class="mascot" onerror="this.style.display='none';">
+        </h1> <!-- Site title with mascot -->
+        <nav>
+            <ul>
+                <!-- Loop through the boards and create navigation links -->
+                <% boards.forEach(board => { %>
+                    <li><a href="/<%= board %>">/<%= board %></a></li>
+                <% }); %>
+            </ul>
+        </nav>
+    </header>
+    <!-- Main content area -->
+    <main>
+        <div class="error-container">
+            <h2>Oops! Something Went Wrong</h2>
+            <p class="error-message"><%= message %></p>
+            <% if (status === 404) { %>
+                <p>It looks like the page you're looking for doesn't exist. Try checking the URL or visiting one of our boards below:</p>
+                <ul class="board-links">
+                    <% boards.forEach(board => { %>
+                        <li><a href="/<%= board %>">/<%= board %></a></li>
+                    <% }); %>
+                </ul>
+            <% } else { %>
+                <p>We're sorry for the inconvenience. Please try again later or return to the <a href="/">home page</a>.</p>
+            <% } %>
+        </div>
+    </main>
+</body>
+</html>
