@@ -1,0 +1,4 @@
+node_modules/
+miyeok.db
+public/uploads/*
+!public/uploads/calico.png

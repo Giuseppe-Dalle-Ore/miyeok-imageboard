@@ -21,6 +21,10 @@
                 <% boards.forEach(b => { %>
                     <li><a href="/<%= b %>">/<%= b %></a></li>
                 <% }); %>
+                <% if (isAdmin) { %>
+                    <li><a href="/admin/change-password">Change Password</a></li>
+                    <li><a href="/admin/logout">Logout</a></li>
+                <% } %>
             </ul>
         </nav>
         <button id="dark-mode-toggle" class="dark-mode-button">Toggle Dark Mode</button>
@@ -28,6 +32,8 @@
     <!-- Main content area -->
     <main>
         <h2>/<%= board %></h2> <!-- Board title -->
+        <!-- Display the board description directly on the background -->
+        <p class="board-description"><%= boardDescription %></p>
         <!-- Tag filter dropdown -->
         <div class="tag-filter">
             <label for="tag-select">Filter by Tag: </label>
@@ -58,8 +64,17 @@
                         <% if (preview.isBumpLimited) { %>
                             <span class="bump-limit-label">[Bump Limit Reached]</span>
                         <% } %>
+                        <% if (preview.pinned) { %>
+                            <span class="pinned-label">[Pinned]</span>
+                        <% } %>
                         (<span class="reply-count"><%= preview.reply_count %> <%= preview.reply_count === 1 ? 'reply' : 'replies' %></span>)
                     </h3> <!-- Thread title with reply count -->
+                    <!-- Admin controls -->
+                    <% if (isAdmin) { %>
+                        <form action="/admin/pin/<%= board %>/<%= preview.thread_id %>" method="POST" style="display: inline;">
+                            <button type="submit"><%= preview.pinned ? 'Unpin' : 'Pin' %> Thread</button>
+                        </form>
+                    <% } %>
                     <!-- Display tags if the thread has any -->
                     <% if (preview.posts[0].tags) { %>
                         <div class="tags">
@@ -90,6 +105,15 @@
                                 <% } %>
                             <% } %>
                             <p><small><%= post.created_at %></small></p> <!-- Post timestamp -->
+                            <!-- Admin controls -->
+                            <% if (isAdmin) { %>
+                                <form action="/admin/ban" method="POST" style="display: inline;">
+                                    <input type="hidden" name="ip_address" value="<%= post.ip_address %>">
+                                    <input type="hidden" name="board" value="<%= board %>">
+                                    <input type="text" name="reason" placeholder="Ban reason" style="width: 150px; margin-right: 5px;">
+                                    <button type="submit" style="background: #a94442;">Ban IP</button>
+                                </form>
+                            <% } %>
                             <!-- Reply form (hidden by default, toggled by JavaScript) -->
                             <form action="/<%= board %>?thread_id=<%= preview.thread_id %>" method="POST" enctype="multipart/form-data" class="reply-form" id="reply-form-<%= post.id %>" style="display: none;" data-thread-id="<%= preview.thread_id %>">
                                 <input type="hidden" name="parent_id" value="<%= preview.thread_id %>"> <!-- Parent ID for the reply -->

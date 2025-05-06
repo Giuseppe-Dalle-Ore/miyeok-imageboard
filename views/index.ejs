@@ -21,6 +21,10 @@
                 <% boards.forEach(board => { %>
                     <li><a href="/<%= board %>">/<%= board %></a></li>
                 <% }); %>
+                <% if (isAdmin) { %>
+                    <li><a href="/admin/change-password">Change Password</a></li>
+                    <li><a href="/admin/logout">Logout</a></li>
+                <% } %>
             </ul>
         </nav>
         <button id="dark-mode-toggle" class="dark-mode-button">Toggle Dark Mode</button>
@@ -86,6 +90,16 @@
                             <% } %>
                         <% } %>
                         <p><small><%= thread.created_at %></small></p> <!-- Post timestamp -->
+                        <!-- Admin controls -->
+                        <% if (isAdmin) { %>
+                            <form action="/admin/ban" method="POST" style="display: inline;">
+                                <input type="hidden" name="ip_address" value="<%= thread.ip_address %>">
+                                <input type="hidden" name="board" value="<%= board %>">
+                                <input type="hidden" name="thread_id" value="<%= thread.id %>">
+                                <input type="text" name="reason" placeholder="Ban reason" style="width: 150px; margin-right: 5px;">
+                                <button type="submit" style="background: #a94442;">Ban IP</button>
+                            </form>
+                        <% } %>
                         <!-- Reply form (hidden by default, toggled by JavaScript) -->
                         <form action="/<%= board %>?thread_id=<%= thread.id %>" method="POST" enctype="multipart/form-data" class="reply-form" id="reply-form-<%= thread.id %>" style="display: none;" data-thread-id="<%= thread.id %>">
                             <input type="hidden" name="parent_id" value="<%= thread.id %>"> <!-- Parent ID for the reply -->
@@ -119,6 +133,16 @@
                                 <% } %>
                             <% } %>
                             <p><small><%= reply.created_at %></small></p> <!-- Reply timestamp -->
+                            <!-- Admin controls -->
+                            <% if (isAdmin) { %>
+                                <form action="/admin/ban" method="POST" style="display: inline;">
+                                    <input type="hidden" name="ip_address" value="<%= reply.ip_address %>">
+                                    <input type="hidden" name="board" value="<%= board %>">
+                                    <input type="hidden" name="thread_id" value="<%= thread.id %>">
+                                    <input type="text" name="reason" placeholder="Ban reason" style="width: 150px; margin-right: 5px;">
+                                    <button type="submit" style="background: #a94442;">Ban IP</button>
+                                </form>
+                            <% } %>
                             <!-- Reply form for replying to this reply -->
                             <form action="/<%= board %>?thread_id=<%= thread.id %>" method="POST" enctype="multipart/form-data" class="reply-form" id="reply-form-<%= reply.id %>" style="display: none;" data-thread-id="<%= thread.id %>">
                                 <input type="hidden" name="parent_id" value="<%= thread.id %>"> <!-- Parent ID (thread ID) -->

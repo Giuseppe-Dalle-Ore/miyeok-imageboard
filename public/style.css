@@ -168,6 +168,14 @@ main {
   text-align: left; /* Align content to the left */
 }
 
+/* Style the board description (now applied directly to the <p> tag) */
+p.board-description {
+  margin: 0 0 20px 0; /* Remove top margin, add space below */
+  font-style: italic; /* Italicize for emphasis */
+  color: var(--text-color); /* Dynamic text color */
+  font-size: 1.1em; /* Slightly larger font for readability */
+}
+
 /* Style forms (used for posting and replying) */
 form {
   margin-bottom: 20px; /* Add space below forms */
@@ -188,6 +196,25 @@ form input[type="file"] {
   display: block; /* Ensure it takes its own line */
   margin-bottom: 10px; /* Space below the file input */
   color: var(--text-color); /* Dynamic text color */
+}
+
+/* Style inputs for admin login form */
+form input[type="text"],
+form input[type="password"] {
+  width: 100%;
+  max-width: 300px; /* Limit width for admin login inputs */
+  padding: 5px;
+  margin: 5px 0;
+  background: var(--background);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+}
+
+/* Style labels for admin login form */
+form label {
+  display: block;
+  margin-top: 10px;
 }
 
 /* Style the tags input */
@@ -419,6 +446,21 @@ form button:hover {
   border-radius: 3px; /* Rounded corners */
   font-size: 0.8em; /* Smaller font */
   margin-left: 5px; /* Space from thread title */
+}
+
+/* Style the pinned label */
+.pinned-label {
+  color: var(--link-color);
+  background: #4a7a45; /* Green background for pinned label */
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+
+/* Dark mode adjustments for pinned label */
+.dark-mode .pinned-label {
+  background: #5a7a5a; /* Lighter green for dark mode */
 }
 
 /* Style the pagination section */
