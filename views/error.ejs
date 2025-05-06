@@ -21,6 +21,11 @@
                 <% boards.forEach(board => { %>
                     <li><a href="/<%= board %>">/<%= board %></a></li>
                 <% }); %>
+                <% if (isAdmin) { %>
+                    <li><a href="/admin/logout">Logout</a></li>
+                <% } else { %>
+                    <li><a href="/admin/login">Admin Login</a></li>
+                <% } %>
             </ul>
         </nav>
     </header>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miyeok - Admin Login</title>
+    <link rel="stylesheet" href="/style.css?v=<%= new Date().getTime() %>">
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="/">Miyeok</a>
+            <img src="/calico.png" alt="Miyeok Mascot" class="mascot" onerror="this.style.display='none';">
+        </h1>
+        <nav>
+            <ul>
+                <% boards.forEach(board => { %>
+                    <li><a href="/<%= board %>">/<%= board %></a></li>
+                <% }); %>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Admin Login</h2>
+        <% if (error) { %>
+            <div class="error-message"><%= error %></div>
+        <% } %>
+        <form action="/admin/login" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <button type="submit">Login</button>
+        </form>
+    </main>
+</body>
+</html>
