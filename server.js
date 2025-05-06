@@ -280,6 +280,103 @@ initializeDatabase.then((db) => {
         });
     });
 
+    /* Route for the admin change password page */
+    app.get('/admin/change-password', isAdmin, (req, res) => {
+        res.render('admin_change_password', { boards, error: null, success: null });
+    });
+
+    /* Route to handle admin change password form submission */
+    app.post('/admin/change-password', isAdmin, (req, res) => {
+        const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+        // Validate inputs
+        if (!currentPassword || !newPassword || !confirmNewPassword) {
+            return res.render('admin_change_password', {
+                boards,
+                error: 'All fields are required.',
+                success: null
+            });
+        }
+
+        if (newPassword !== confirmNewPassword) {
+            return res.render('admin_change_password', {
+                boards,
+                error: 'New passwords do not match.',
+                success: null
+            });
+        }
+
+        if (newPassword.length < 8) {
+            return res.render('admin_change_password', {
+                boards,
+                error: 'New password must be at least 8 characters long.',
+                success: null
+            });
+        }
+
+        // Fetch the admin user (we'll use the first admin since there's only one for now)
+        db.get(`SELECT * FROM admins LIMIT 1`, (err, admin) => {
+            if (err || !admin) {
+                console.error('Error fetching admin for password change:', err);
+                return res.status(500).render('admin_change_password', {
+                    boards,
+                    error: 'An error occurred. Please try again later.',
+                    success: null
+                });
+            }
+
+            // Verify the current password
+            bcrypt.compare(currentPassword, admin.password, (err, match) => {
+                if (err) {
+                    console.error('Error comparing passwords:', err);
+                    return res.status(500).render('admin_change_password', {
+                        boards,
+                        error: 'An error occurred. Please try again later.',
+                        success: null
+                    });
+                }
+
+                if (!match) {
+                    return res.render('admin_change_password', {
+                        boards,
+                        error: 'Current password is incorrect.',
+                        success: null
+                    });
+                }
+
+                // Hash the new password
+                bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
+                    if (err) {
+                        console.error('Error hashing new password:', err);
+                        return res.status(500).render('admin_change_password', {
+                            boards,
+                            error: 'An error occurred while updating the password.',
+                            success: null
+                        });
+                    }
+
+                    // Update the password in the database
+                    db.run(`UPDATE admins SET password = ? WHERE id = ?`, [hashedPassword, admin.id], (err) => {
+                        if (err) {
+                            console.error('Error updating password:', err);
+                            return res.status(500).render('admin_change_password', {
+                                boards,
+                                error: 'An error occurred while updating the password.',
+                                success: null
+                            });
+                        }
+
+                        res.render('admin_change_password', {
+                            boards,
+                            error: null,
+                            success: 'Password updated successfully!'
+                        });
+                    });
+                });
+            });
+        });
+    });
+
     /* Route for the home page */
     app.get('/', (req, res) => {
         res.render('index', { page: 'home', boards, isAdmin: req.session.isAdmin });
