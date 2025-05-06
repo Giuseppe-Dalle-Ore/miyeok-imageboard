@@ -176,6 +176,30 @@ p.board-description {
   font-size: 1.1em; /* Slightly larger font for readability */
 }
 
+/* Style the delineator between the OP and replies in thread previews */
+.delineator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 15px 0; /* Space above and below the delineator */
+  color: var(--text-color); /* Dynamic text color */
+}
+
+/* Style the horizontal line on either side of the delineator label */
+.delineator::before,
+.delineator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-color); /* Dynamic border color for the line */
+}
+
+/* Style the "Replies" label in the delineator */
+.delineator span {
+  padding: 0 10px; /* Space around the label */
+  font-size: 0.9em; /* Slightly smaller font */
+  font-weight: bold; /* Bold for emphasis */
+}
+
 /* Style forms (used for posting and replying) */
 form {
   margin-bottom: 20px; /* Add space below forms */
@@ -260,7 +284,7 @@ form button:hover {
 /* Style the error container on the error page */
 .error-container {
   background: var(--error-bg); /* Dynamic error background */
-  border: 1px solid var(--error-border); /* Dynamic error border */
+  border: 1px solid var(--border-color); /* Dynamic error border */
   padding: 20px; /* Padding inside */
   border-radius: 5px; /* Rounded corners */
   text-align: center; /* Center-align text */
