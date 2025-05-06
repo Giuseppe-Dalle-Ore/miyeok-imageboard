@@ -168,6 +168,14 @@ main {
   text-align: left; /* Align content to the left */
 }
 
+/* Style the board description (now applied directly to the <p> tag) */
+p.board-description {
+  margin: 0 0 20px 0; /* Remove top margin, add space below */
+  font-style: italic; /* Italicize for emphasis */
+  color: var(--text-color); /* Dynamic text color */
+  font-size: 1.1em; /* Slightly larger font for readability */
+}
+
 /* Style forms (used for posting and replying) */
 form {
   margin-bottom: 20px; /* Add space below forms */

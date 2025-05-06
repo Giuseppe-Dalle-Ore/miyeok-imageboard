@@ -68,8 +68,16 @@ app.use(express.static('public'));
 app.use(express.static(__dirname)); // Serve files from the root directory
 app.set('view engine', 'ejs');
 
-/* Define available boards (categories) for the imageboard */
-const boards = ['ish', 'tech', 'mu', 'animals', '2Afriendly', 'pictures', 'videos'];
+/* Define available boards (categories) for the imageboard with descriptions */
+const boards = [
+    { name: 'ish', description: 'General discussion and random topics.' },
+    { name: 'tech', description: 'Technology, gadgets, and software.' },
+    { name: 'mu', description: 'Music, bands, and audio discussions.' },
+    { name: 'animals', description: 'All about pets, wildlife, and animal lovers.' },
+    { name: '2Afriendly', description: 'Second Amendment discussions and firearm topics.' },
+    { name: 'pictures', description: 'Share and discuss photos and images.' },
+    { name: 'videos', description: 'Video content, clips, and filmmaking.' }
+];
 const THREADS_PER_PAGE = 10;
 const MAX_PAGES = 10;
 const MAX_THREADS = THREADS_PER_PAGE * MAX_PAGES;
@@ -85,14 +93,14 @@ const checkBan = (req, res, next) => {
                 return res.status(500).render('error', {
                     status: 500,
                     message: 'An error occurred while checking ban status.',
-                    boards
+                    boards: boards.map(board => board.name)
                 });
             }
             if (ban) {
                 return res.status(403).render('error', {
                     status: 403,
                     message: `You are banned. Reason: ${ban.reason}`,
-                    boards
+                    boards: boards.map(board => board.name)
                 });
             }
             next();
@@ -102,7 +110,7 @@ const checkBan = (req, res, next) => {
         res.status(500).render('error', {
             status: 500,
             message: 'Database error occurred.',
-            boards
+            boards: boards.map(board => board.name)
         });
     });
 };
@@ -127,7 +135,7 @@ const postLimiter = rateLimit({
         res.status(429).render('error', {
             status: 429,
             message: 'You are posting too quickly! Please wait a minute before trying again.',
-            boards
+            boards: boards.map(board => board.name)
         });
     },
     standardHeaders: true,
@@ -220,7 +228,7 @@ const convertTextToHtml = (text) => {
 initializeDatabase.then((db) => {
     /* Route for the admin login page */
     app.get('/admin/login', (req, res) => {
-        res.render('admin_login', { boards, error: null });
+        res.render('admin_login', { boards: boards.map(board => board.name), error: null });
     });
 
     /* Route to handle admin login form submission */
@@ -231,14 +239,14 @@ initializeDatabase.then((db) => {
             if (err) {
                 console.error('Error fetching admin:', err);
                 return res.status(500).render('admin_login', {
-                    boards,
+                    boards: boards.map(board => board.name),
                     error: 'An error occurred. Please try again later.'
                 });
             }
 
             if (!admin) {
                 return res.render('admin_login', {
-                    boards,
+                    boards: boards.map(board => board.name),
                     error: 'Invalid username or password.'
                 });
             }
@@ -247,7 +255,7 @@ initializeDatabase.then((db) => {
                 if (err) {
                     console.error('Error comparing passwords:', err);
                     return res.status(500).render('admin_login', {
-                        boards,
+                        boards: boards.map(board => board.name),
                         error: 'An error occurred. Please try again later.'
                     });
                 }
@@ -257,7 +265,7 @@ initializeDatabase.then((db) => {
                     res.redirect('/');
                 } else {
                     res.render('admin_login', {
-                        boards,
+                        boards: boards.map(board => board.name),
                         error: 'Invalid username or password.'
                     });
                 }
@@ -273,7 +281,7 @@ initializeDatabase.then((db) => {
                 return res.status(500).render('error', {
                     status: 500,
                     message: 'Error logging out.',
-                    boards
+                    boards: boards.map(board => board.name)
                 });
             }
             res.redirect('/');
@@ -282,7 +290,7 @@ initializeDatabase.then((db) => {
 
     /* Route for the admin change password page */
     app.get('/admin/change-password', isAdmin, (req, res) => {
-        res.render('admin_change_password', { boards, error: null, success: null });
+        res.render('admin_change_password', { boards: boards.map(board => board.name), error: null, success: null });
     });
 
     /* Route to handle admin change password form submission */
@@ -292,7 +300,7 @@ initializeDatabase.then((db) => {
         // Validate inputs
         if (!currentPassword || !newPassword || !confirmNewPassword) {
             return res.render('admin_change_password', {
-                boards,
+                boards: boards.map(board => board.name),
                 error: 'All fields are required.',
                 success: null
             });
@@ -300,7 +308,7 @@ initializeDatabase.then((db) => {
 
         if (newPassword !== confirmNewPassword) {
             return res.render('admin_change_password', {
-                boards,
+                boards: boards.map(board => board.name),
                 error: 'New passwords do not match.',
                 success: null
             });
@@ -308,7 +316,7 @@ initializeDatabase.then((db) => {
 
         if (newPassword.length < 8) {
             return res.render('admin_change_password', {
-                boards,
+                boards: boards.map(board => board.name),
                 error: 'New password must be at least 8 characters long.',
                 success: null
             });
@@ -319,7 +327,7 @@ initializeDatabase.then((db) => {
             if (err || !admin) {
                 console.error('Error fetching admin for password change:', err);
                 return res.status(500).render('admin_change_password', {
-                    boards,
+                    boards: boards.map(board => board.name),
                     error: 'An error occurred. Please try again later.',
                     success: null
                 });
@@ -330,7 +338,7 @@ initializeDatabase.then((db) => {
                 if (err) {
                     console.error('Error comparing passwords:', err);
                     return res.status(500).render('admin_change_password', {
-                        boards,
+                        boards: boards.map(board => board.name),
                         error: 'An error occurred. Please try again later.',
                         success: null
                     });
@@ -338,7 +346,7 @@ initializeDatabase.then((db) => {
 
                 if (!match) {
                     return res.render('admin_change_password', {
-                        boards,
+                        boards: boards.map(board => board.name),
                         error: 'Current password is incorrect.',
                         success: null
                     });
@@ -349,7 +357,7 @@ initializeDatabase.then((db) => {
                     if (err) {
                         console.error('Error hashing new password:', err);
                         return res.status(500).render('admin_change_password', {
-                            boards,
+                            boards: boards.map(board => board.name),
                             error: 'An error occurred while updating the password.',
                             success: null
                         });
@@ -360,14 +368,14 @@ initializeDatabase.then((db) => {
                         if (err) {
                             console.error('Error updating password:', err);
                             return res.status(500).render('admin_change_password', {
-                                boards,
+                                boards: boards.map(board => board.name),
                                 error: 'An error occurred while updating the password.',
                                 success: null
                             });
                         }
 
                         res.render('admin_change_password', {
-                            boards,
+                            boards: boards.map(board => board.name),
                             error: null,
                             success: 'Password updated successfully!'
                         });
@@ -379,17 +387,18 @@ initializeDatabase.then((db) => {
 
     /* Route for the home page */
     app.get('/', (req, res) => {
-        res.render('index', { page: 'home', boards, isAdmin: req.session.isAdmin });
+        res.render('index', { page: 'home', boards: boards.map(board => board.name), isAdmin: req.session.isAdmin });
     });
 
     /* Route for a board (redirects to the first page) */
     app.get('/:board', (req, res) => {
         const board = req.params.board;
-        if (!boards.includes(board)) {
+        const boardExists = boards.some(b => b.name === board);
+        if (!boardExists) {
             return res.status(404).render('error', {
                 status: 404,
                 message: `Board "/${board}" not found.`,
-                boards,
+                boards: boards.map(board => board.name),
                 isAdmin: req.session.isAdmin
             });
         }
@@ -401,14 +410,19 @@ initializeDatabase.then((db) => {
         const board = req.params.board;
         const page = parseInt(req.params.page) || 1;
         const selectedTag = req.query.tag || null;
-        if (!boards.includes(board) || page < 1) {
+        const boardExists = boards.some(b => b.name === board);
+        if (!boardExists || page < 1) {
             return res.status(404).render('error', {
                 status: 404,
                 message: page < 1 ? 'Invalid page number.' : `Board "/${board}" not found.`,
-                boards,
+                boards: boards.map(board => board.name),
                 isAdmin: req.session.isAdmin
             });
         }
+
+        // Get the board description
+        const boardInfo = boards.find(b => b.name === board);
+        const boardDescription = boardInfo ? boardInfo.description : '';
 
         db.all(`
             SELECT DISTINCT tags
@@ -420,7 +434,7 @@ initializeDatabase.then((db) => {
                 return res.status(500).render('error', {
                     status: 500,
                     message: 'An error occurred while fetching tags. Please try again later.',
-                    boards,
+                    boards: boards.map(board => board.name),
                     isAdmin: req.session.isAdmin
                 });
             }
@@ -453,7 +467,7 @@ initializeDatabase.then((db) => {
                     return res.status(500).render('error', {
                         status: 500,
                         message: 'An error occurred while fetching threads. Please try again later.',
-                        boards,
+                        boards: boards.map(board => board.name),
                         isAdmin: req.session.isAdmin
                     });
                 }
@@ -465,7 +479,7 @@ initializeDatabase.then((db) => {
                     return res.status(404).render('error', {
                         status: 404,
                         message: `Page ${page} not found for board "/${board}".`,
-                        boards,
+                        boards: boards.map(board => board.name),
                         isAdmin: req.session.isAdmin
                     });
                 }
@@ -530,7 +544,7 @@ initializeDatabase.then((db) => {
                         return res.status(500).render('error', {
                             status: 500,
                             message: 'An error occurred while fetching threads. Please try again later.',
-                            boards,
+                            boards: boards.map(board => board.name),
                             isAdmin: req.session.isAdmin
                         });
                     }
@@ -539,7 +553,18 @@ initializeDatabase.then((db) => {
                     let completed = 0;
 
                     if (threads.length === 0) {
-                        return res.render('boards', { board, threads: [], previews, boards, page, totalPages, tags: uniqueTags, selectedTag, isAdmin: req.session.isAdmin });
+                        return res.render('boards', { 
+                            board, 
+                            threads: [], 
+                            previews, 
+                            boards: boards.map(board => board.name), 
+                            page, 
+                            totalPages, 
+                            tags: uniqueTags, 
+                            selectedTag, 
+                            isAdmin: req.session.isAdmin,
+                            boardDescription 
+                        });
                     }
 
                     threads.forEach(thread => {
@@ -574,7 +599,7 @@ initializeDatabase.then((db) => {
                                 return res.status(500).render('error', {
                                     status: 500,
                                     message: 'An error occurred while fetching replies. Please try again later.',
-                                    boards,
+                                    boards: boards.map(board => board.name),
                                     isAdmin: req.session.isAdmin
                                 });
                             }
@@ -599,7 +624,18 @@ initializeDatabase.then((db) => {
                                     const orderB = threadB.reply_count < BUMP_LIMIT ? threadB.last_activity : threadB.created_at;
                                     return new Date(orderB) - new Date(orderA);
                                 });
-                                res.render('boards', { board, threads, previews, boards, page, totalPages, tags: uniqueTags, selectedTag, isAdmin: req.session.isAdmin });
+                                res.render('boards', { 
+                                    board, 
+                                    threads, 
+                                    previews, 
+                                    boards: boards.map(board => board.name), 
+                                    page, 
+                                    totalPages, 
+                                    tags: uniqueTags, 
+                                    selectedTag, 
+                                    isAdmin: req.session.isAdmin,
+                                    boardDescription 
+                                });
                             }
                         });
                     });
@@ -611,11 +647,12 @@ initializeDatabase.then((db) => {
     /* Route for viewing a specific thread */
     app.get('/:board/:id', (req, res) => {
         const { board, id } = req.params;
-        if (!boards.includes(board)) {
+        const boardExists = boards.some(b => b.name === board);
+        if (!boardExists) {
             return res.status(404).render('error', {
                 status: 404,
                 message: `Board "/${board}" not found.`,
-                boards,
+                boards: boards.map(board => board.name),
                 isAdmin: req.session.isAdmin
             });
         }
@@ -629,7 +666,7 @@ initializeDatabase.then((db) => {
                 return res.status(404).render('error', {
                     status: 404,
                     message: err ? 'An error occurred while fetching the thread. Please try again later.' : `Thread #${id} not found on board "/${board}".`,
-                    boards,
+                    boards: boards.map(board => board.name),
                     isAdmin: req.session.isAdmin
                 });
             }
@@ -650,7 +687,7 @@ initializeDatabase.then((db) => {
                     return res.status(500).render('error', {
                         status: 500,
                         message: 'An error occurred while fetching replies. Please try again later.',
-                        boards,
+                        boards: boards.map(board => board.name),
                         isAdmin: req.session.isAdmin
                     });
                 }
@@ -663,7 +700,7 @@ initializeDatabase.then((db) => {
                     isVideo: reply.image && reply.image.match(/\.(mp4|webm)$/i)
                 }));
 
-                res.render('index', { page: 'thread', board, thread, replies, boards, isAdmin: req.session.isAdmin });
+                res.render('index', { page: 'thread', board, thread, replies, boards: boards.map(board => board.name), isAdmin: req.session.isAdmin });
             });
         });
     });
@@ -681,7 +718,7 @@ initializeDatabase.then((db) => {
                 return res.status(500).render('error', {
                     status: 500,
                     message: 'Error banning user.',
-                    boards,
+                    boards: boards.map(board => board.name),
                     isAdmin: req.session.isAdmin
                 });
             }
@@ -703,7 +740,7 @@ initializeDatabase.then((db) => {
                 return res.status(404).render('error', {
                     status: 404,
                     message: err ? 'Error fetching thread.' : `Thread #${id} not found.`,
-                    boards,
+                    boards: boards.map(board => board.name),
                     isAdmin: req.session.isAdmin
                 });
             }
@@ -715,7 +752,7 @@ initializeDatabase.then((db) => {
                     return res.status(500).render('error', {
                         status: 500,
                         message: 'Error pinning thread.',
-                        boards,
+                        boards: boards.map(board => board.name),
                         isAdmin: req.session.isAdmin
                     });
                 }
@@ -728,11 +765,12 @@ initializeDatabase.then((db) => {
     app.post('/:board', postLimiter, upload, (req, res) => {
         const { board } = req.params;
 
-        if (!boards.includes(board)) {
+        const boardExists = boards.some(b => b.name === board);
+        if (!boardExists) {
             return res.status(404).render('error', {
                 status: 404,
                 message: `Board "/${board}" not found.`,
-                boards,
+                boards: boards.map(board => board.name),
                 isAdmin: req.session.isAdmin
             });
         }
@@ -773,7 +811,7 @@ initializeDatabase.then((db) => {
                         res.status(400).render('error', {
                             status: 400,
                             message: validationErr.message,
-                            boards,
+                            boards: boards.map(board => board.name),
                             isAdmin: req.session.isAdmin
                         });
                     });
@@ -794,7 +832,7 @@ initializeDatabase.then((db) => {
                 return res.status(500).render('error', {
                     status: 500,
                     message: 'An error occurred while saving your post. Please try again later.',
-                    boards,
+                    boards: boards.map(board => board.name),
                     isAdmin: req.session.isAdmin
                 });
             }
