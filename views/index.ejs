@@ -26,6 +26,7 @@
                     <% } %>
                 <% }); %>
                 <% if (isAdmin) { %>
+                    <li><a href="/admin/manage-boards">Manage Boards</a></li>
                     <li><a href="/admin/change-password">Change Password</a></li>
                     <li><a href="/admin/logout">Logout</a></li>
                 <% } %>
@@ -42,7 +43,7 @@
             <ul>
                 <!-- List all boards as links using displayName -->
                 <% boards.forEach(board => { %>
-                    <li><a href="/<%= board.name %>"><%= board.displayName %></a></li>
+                    <li><a href="/<%= board.name %>"><%= board.display_name %></a></li>
                 <% }); %>
             </ul>
             <!-- Instructions section explaining how the site works -->

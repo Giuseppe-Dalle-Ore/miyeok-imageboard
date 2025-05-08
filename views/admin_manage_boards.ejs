@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miyeok - Manage Boards</title>
+    <link rel="stylesheet" href="/style.css?v=<%= new Date().getTime() %>">
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="/">Miyeok</a>
+            <img src="/calico.png" alt="Miyeok Mascot" class="mascot" onerror="this.style.display='none';">
+        </h1>
+        <nav>
+            <ul>
+                <% boards.forEach(board => { %>
+                    <li><a href="/<%= board %>">/<%= board %></a></li>
+                <% }); %>
+                <li><a href="/admin/change-password">Change Password</a></li>
+                <li><a href="/admin/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Manage Boards</h2>
+        <% if (error) { %>
+            <div class="error-message"><%= error %></div>
+        <% } %>
+        <% if (success) { %>
+            <div style="color: green; background: #d4e4d1; padding: 5px 10px; border-radius: 3px; margin-bottom: 10px;">
+                <%= success %>
+            </div>
+        <% } %>
+
+        <!-- Form to add a new board -->
+        <h3>Add New Board</h3>
+        <form action="/admin/add-board" method="POST">
+            <label for="name">Board Name (e.g., "ish"):</label>
+            <input type="text" id="name" name="name" required>
+            <br>
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" required>
+            <br>
+            <label for="displayName">Display Name (e.g., "random"):</label>
+            <input type="text" id="displayName" name="displayName" required>
+            <br>
+            <button type="submit">Add Board</button>
+        </form>
+
+        <!-- List of existing boards with remove option -->
+        <h3>Existing Boards</h3>
+        <% if (allBoards.length === 0) { %>
+            <p>No boards available.</p>
+        <% } else { %>
+            <ul>
+                <% allBoards.forEach(board => { %>
+                    <li>
+                        /<%= board.name %> - <%= board.description %> (Display: <%= board.display_name %>)
+                        <form action="/admin/remove-board" method="POST" style="display: inline;">
+                            <input type="hidden" name="name" value="<%= board.name %>">
+                            <button type="submit" style="background: #a94442;">Remove</button>
+                        </form>
+                    </li>
+                <% }); %>
+            </ul>
+        <% } %>
+    </main>
+</body>
+</html>
