@@ -17,6 +17,11 @@
                 <% boards.forEach(board => { %>
                     <li><a href="/<%= board %>">/<%= board %></a></li>
                 <% }); %>
+                <% if (isAdmin) { %>
+                    <li><a href="/admin/manage-boards">Manage Boards</a></li>
+                    <li><a href="/admin/change-password">Change Password</a></li>
+                    <li><a href="/admin/logout">Logout</a></li>
+                <% } %>
             </ul>
         </nav>
     </header>

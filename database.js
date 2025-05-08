@@ -113,6 +113,62 @@ const initializeDatabase = () => {
                             return;
                         }
                         console.log('Admins table created or already exists');
+                    });
+
+                    // Create the 'boards' table for managing boards
+                    db.run(`
+                        CREATE TABLE IF NOT EXISTS boards (
+                            name TEXT PRIMARY KEY, -- Board shorthand name (e.g., 'ish')
+                            description TEXT NOT NULL, -- Board description
+                            display_name TEXT NOT NULL -- Display name for the home page (e.g., 'random')
+                        )
+                    `, (err) => {
+                        if (err) {
+                            console.error('Error creating boards table:', err.message);
+                            reject(err);
+                            return;
+                        }
+                        console.log('Boards table created or already exists');
+
+                        // Insert default boards if the table is empty
+                        db.get(`SELECT COUNT(*) as count FROM boards`, (err, row) => {
+                            if (err) {
+                                console.error('Error checking boards table:', err.message);
+                                reject(err);
+                                return;
+                            }
+
+                            if (row.count === 0) {
+                                const defaultBoards = [
+                                    ['ish', 'General discussion and random topics.', 'random'],
+                                    ['tech', 'Technology, gadgets, and software.', 'tech'],
+                                    ['mu', 'Music, bands, and audio discussions.', 'music'],
+                                    ['animals', 'All about pets, wildlife, and animal lovers.', 'animals'],
+                                    ['2Afriendly', 'Second Amendment discussions and firearm topics.', '2Afriendly'],
+                                    ['pictures', 'Share and discuss photos and images.', 'pictures'],
+                                    ['videos', 'Video content, clips, and filmmaking.', 'videos']
+                                ];
+
+                                const stmt = db.prepare(`INSERT INTO boards (name, description, display_name) VALUES (?, ?, ?)`);
+                                defaultBoards.forEach(board => {
+                                    stmt.run(board, (err) => {
+                                        if (err) {
+                                            console.error(`Error inserting board ${board[0]}:`, err.message);
+                                        }
+                                    });
+                                });
+                                stmt.finalize((err) => {
+                                    if (err) {
+                                        console.error('Error finalizing board insertions:', err.message);
+                                        reject(err);
+                                        return;
+                                    }
+                                    console.log('Default boards inserted');
+                                });
+                            } else {
+                                console.log('Boards table already contains data');
+                            }
+                        });
 
                         // Create indexes on frequently queried columns
                         db.run(`
