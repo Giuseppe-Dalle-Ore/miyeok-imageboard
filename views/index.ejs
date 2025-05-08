@@ -17,9 +17,13 @@
         </h1> <!-- Site title with mascot -->
         <nav>
             <ul>
-                <!-- Loop through the boards and create navigation links -->
+                <!-- Loop through the boards and create navigation links using board.name -->
                 <% boards.forEach(board => { %>
-                    <li><a href="/<%= board %>">/<%= board %></a></li>
+                    <% if (page === 'home') { %>
+                        <li><a href="/<%= board.name %>">/<%= board.name %></a></li>
+                    <% } else { %>
+                        <li><a href="/<%= board %>">/<%= board %></a></li>
+                    <% } %>
                 <% }); %>
                 <% if (isAdmin) { %>
                     <li><a href="/admin/change-password">Change Password</a></li>
@@ -36,9 +40,9 @@
             <h2>Welcome to Miyeok</h2> <!-- Welcome message -->
             <p>Anonymous imageboard inspired by seaweed soup. Choose a board:</p>
             <ul>
-                <!-- List all boards as links -->
+                <!-- List all boards as links using displayName -->
                 <% boards.forEach(board => { %>
-                    <li><a href="/<%= board %>">/<%= board %></a></li>
+                    <li><a href="/<%= board.name %>"><%= board.displayName %></a></li>
                 <% }); %>
             </ul>
             <!-- Instructions section explaining how the site works -->
